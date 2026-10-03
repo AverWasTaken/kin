@@ -1,0 +1,161 @@
+/* Design tokens. Light is paper, dark is ink. The accent follows the agent's avatar color
+   (set at runtime by lib/color.ts) so the conversation takes on the character's tint. */
+
+:root {
+  color-scheme: light dark;
+
+  --bg: #f7f5f0;
+  --bg-elev: #ffffff;
+  --bg-sunk: #efece5;
+  --bg-tint: #f1eee7;
+  --bubble-agent: #ebe7df;
+  --bubble-agent-text: #1c1b19;
+  --text: #1c1b19;
+  --text-2: #6b665d;
+  --text-3: #a29c91;
+  --hairline: rgba(66, 52, 30, 0.16);
+  --hairline-strong: rgba(66, 52, 30, 0.26);
+  --fill: rgba(66, 52, 30, 0.07);
+  --fill-2: rgba(66, 52, 30, 0.12);
+  --scrim: rgba(28, 24, 18, 0.32);
+  --bar-bg: rgba(247, 245, 240, 0.88);
+  /* Opaque bars over scrolling content: blur there costs frames on iOS. */
+  --bar-solid: #f7f5f0;
+  --glass: rgba(255, 255, 255, 0.72);
+
+  --accent: #57c4a4;
+  --accent-ink: #181a18;
+  --accent-text-light: #2a7d64;
+  --accent-text-dark: #6fd6b6;
+  --accent-text: var(--accent-text-light);
+  --accent-rgb: 87, 196, 164;
+  --accent-soft: rgba(var(--accent-rgb), 0.16);
+
+  --danger: #d6453f;
+  --ok: #2a9a68;
+  --warn: #c98a12;
+  --info: #3d84d6;
+
+  /* The approval surface reads as a different material on purpose. */
+  --guard-bg: #1e2023;
+  --guard-text: #f3f0ea;
+  --guard-2: #a7a399;
+  --guard-line: rgba(255, 255, 255, 0.1);
+  --guard-amber: #f2b441;
+  --guard-code: #141518;
+
+  --shadow-1: 0 0.5px 0 rgba(66, 52, 30, 0.06), 0 2px 8px rgba(66, 52, 30, 0.05);
+  --shadow-2: 0 1px 2px rgba(40, 30, 10, 0.06), 0 10px 30px rgba(40, 30, 10, 0.1);
+  --shadow-3: 0 2px 6px rgba(20, 16, 8, 0.1), 0 24px 60px rgba(20, 16, 8, 0.2);
+
+  /* SF Pro on Apple devices; Inter (the closest open cut of it) everywhere else. */
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter Variable", "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui,
+    Roboto, "Helvetica Neue", sans-serif;
+  /* Apple's text tracking: SF is drawn loose and tightened per size (17px -> -0.022em).
+     Inter needs about half that. main.tsx adds .no-sf off Apple platforms. */
+  --track-17: -0.022em;
+  --track-15: -0.014em;
+  --track-body: -0.01em;
+  --font-round: ui-rounded, "SF Pro Rounded", "Nunito", var(--font);
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+
+  --r-bubble: 19px;
+  --r-card: 22px;
+  --r-sheet: 14px;
+  --r-control: 12px;
+
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+
+  /* Floating tab bar: a glass capsule above the home indicator. --dock is everything below
+     the content (bar + its gap to the screen edge). */
+  --tabbar-h: 62px;
+  --tabbar-b: max(calc(var(--safe-b) - 10px), 12px);
+  --dock: calc(var(--tabbar-h) + var(--tabbar-b));
+
+  /* iMessage's conversation palette; the rest of the app keeps its own surfaces. */
+  --im-bg: #ffffff;
+  --im-gray: #e9e9eb;
+  --im-gray-text: #000000;
+  --im-meta: #8e8e93;
+  --im-line: rgba(60, 60, 67, 0.29);
+  --im-glass: rgba(252, 252, 253, 0.96);
+  --im-field: #ffffff;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* The keyboard slide: a decelerating curve paced like the iOS keyboard itself. */
+  --spring-kb: cubic-bezier(0.32, 0.72, 0, 1);
+  --spring-kb-ms: 420ms;
+
+  /* Incoming replies: a plain, unhurried ease-out (no spring). */
+  --ease-calm: cubic-bezier(0.33, 1, 0.68, 1);
+  --calm-ms: 640ms;
+
+  /* Damped springs sampled into linear() (the same technique motion uses for its
+     hardware-accelerated springs). Each curve pairs with its settle time.
+     pop: incoming bubbles, typing dots, cards. bubble: your sent bubbles.
+     soft: tab bar, composer. glide: the list and keyboard slides (no bounce). */
+  --spring-pop: linear(0, 0.029, 0.095, 0.195, 0.305, 0.421, 0.547, 0.659, 0.768, 0.858, 0.934, 1.001, 1.048, 1.086, 1.108, 1.121, 1.126, 1.123, 1.115, 1.103, 1.09, 1.074, 1.059, 1.044, 1.031, 1.02, 1.009, 1.001, 0.994, 0.99, 0.987, 0.985, 0.984, 0.984, 0.985, 0.987, 0.989, 0.99, 0.992, 0.994, 0.996, 0.997, 0.999, 1, 1.001, 1.001, 1.002, 1.002, 1);
+  --spring-pop-ms: 643ms; /* k300 c19, overshoot 0.126 */
+  --spring-bubble: linear(0, 0.027, 0.092, 0.176, 0.281, 0.384, 0.495, 0.592, 0.689, 0.774, 0.843, 0.904, 0.951, 0.99, 1.018, 1.039, 1.052, 1.06, 1.063, 1.062, 1.059, 1.054, 1.047, 1.041, 1.034, 1.027, 1.022, 1.016, 1.011, 1.007, 1.004, 1.001, 0.999, 0.998, 0.997, 0.996, 0.996, 0.996, 0.996, 0.996, 0.997, 0.997, 0.998, 0.998, 0.999, 0.999, 0.999, 0.999, 1);
+  --spring-bubble-ms: 651ms; /* k280 c22, overshoot 0.063 */
+  --spring-soft: linear(0, 0.018, 0.063, 0.121, 0.194, 0.273, 0.348, 0.428, 0.5, 0.572, 0.638, 0.694, 0.748, 0.792, 0.834, 0.87, 0.898, 0.924, 0.943, 0.961, 0.975, 0.985, 0.994, 1, 1.005, 1.008, 1.01, 1.012, 1.012, 1.012, 1.012, 1.011, 1.011, 1.01, 1.009, 1.008, 1.007, 1.006, 1.005, 1.004, 1.004, 1.003, 1.002, 1.002, 1.002, 1.001, 1.001, 1.001, 1);
+  --spring-soft-ms: 605ms; /* k220 c24, overshoot 0.012 */
+  --spring-glide: linear(0, 0.012, 0.04, 0.082, 0.131, 0.182, 0.24, 0.299, 0.358, 0.411, 0.467, 0.52, 0.57, 0.616, 0.656, 0.695, 0.732, 0.765, 0.792, 0.819, 0.843, 0.864, 0.881, 0.898, 0.913, 0.926, 0.938, 0.947, 0.955, 0.963, 0.969, 0.974, 0.979, 0.983, 0.986, 0.989, 0.991, 0.993, 0.995, 0.996, 0.997, 0.998, 0.999, 0.999, 1, 1, 1, 1.001, 1);
+  --spring-glide-ms: 517ms; /* k190 c25, overshoot 0.001 */
+}
+
+.no-sf {
+  --track-17: -0.011em;
+  --track-15: -0.008em;
+  --track-body: -0.004em;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111215;
+    --bg-elev: #1b1d21;
+    --bg-sunk: #0b0c0e;
+    --bg-tint: #17191c;
+    --bubble-agent: #26292e;
+    --bubble-agent-text: #eeebe5;
+    --text: #eeebe5;
+    --text-2: #9b978f;
+    --text-3: #67645e;
+    --hairline: rgba(255, 250, 240, 0.11);
+    --hairline-strong: rgba(255, 250, 240, 0.18);
+    --fill: rgba(255, 250, 240, 0.07);
+    --fill-2: rgba(255, 250, 240, 0.12);
+    --scrim: rgba(0, 0, 0, 0.5);
+    --bar-bg: rgba(17, 18, 21, 0.94);
+    --bar-solid: #141518;
+    --glass: rgba(38, 41, 46, 0.72);
+    --accent-text: var(--accent-text-dark);
+    --accent-soft: rgba(var(--accent-rgb), 0.2);
+
+    --danger: #ff6b63;
+    --ok: #4cc58b;
+    --warn: #f0b43c;
+    --info: #64a8f5;
+
+    --im-bg: #000000;
+    --im-gray: #262628;
+    --im-gray-text: #ffffff;
+    --im-meta: #8e8e93;
+    --im-line: rgba(84, 84, 88, 0.65);
+    --im-glass: rgba(30, 30, 32, 0.96);
+    --im-field: #000000;
+
+    --guard-bg: #26231d;
+    --guard-text: #f6f1e6;
+    --guard-2: #b3ab9b;
+    --guard-line: rgba(242, 180, 65, 0.22);
+    --guard-code: #1a1814;
+
+    --shadow-1: 0 0 0 0.5px rgba(255, 255, 255, 0.04);
+    --shadow-2: 0 0 0 0.5px rgba(255, 255, 255, 0.05), 0 10px 30px rgba(0, 0, 0, 0.35);
+    --shadow-3: 0 0 0 0.5px rgba(255, 255, 255, 0.06), 0 24px 60px rgba(0, 0, 0, 0.55);
+  }
+}

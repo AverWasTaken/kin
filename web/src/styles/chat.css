@@ -1,0 +1,1613 @@
+/* ================================================================= Chat */
+
+.chat {
+  /* The conversation wears iMessage's palette: white or black, gray bubbles. */
+  --bg: var(--im-bg);
+  --bubble-agent: var(--im-gray);
+  --bubble-agent-text: var(--im-gray-text);
+  --chat-head-h: calc(var(--safe-t) + 84px);
+  --chat-bottom: calc(var(--composer-h, 52px) + var(--dock));
+}
+.kb-open .chat {
+  --chat-bottom: var(--composer-h, 52px);
+}
+.chat.has-banner .thread-scroll {
+  padding-top: calc(var(--chat-head-h) + 74px);
+}
+/* Messages fade out under the floating composer and tab bar instead of hitting a bar edge.
+   It starts at the composer's top edge, never over the newest bubble. */
+.chat::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 7;
+  height: var(--chat-bottom);
+  background: linear-gradient(to bottom, transparent, var(--bg) 30%);
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------- header */
+
+.chat-head {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 56px 1fr 56px;
+  align-items: start;
+  padding: calc(var(--safe-t) + 4px) 4px 22px;
+  /* No bar: the conversation runs full-screen underneath and fades out under the avatar and
+     buttons, which float over it. A plain gradient (no backdrop blur) costs nothing to move. */
+  background: linear-gradient(
+    to bottom,
+    var(--bg) 0%,
+    var(--bg) calc(100% - 26px),
+    color-mix(in srgb, var(--bg) 70%, transparent) calc(100% - 14px),
+    transparent 100%
+  );
+  pointer-events: none;
+}
+.chat-head > * {
+  pointer-events: auto;
+}
+.head-left,
+.head-right {
+  margin-top: 8px;
+  justify-self: center;
+  position: relative;
+}
+/* The floating buttons get their own little glass disc so they read over any message. */
+.chat-head .icon-btn {
+  width: 40px;
+  height: 40px;
+  background: var(--im-glass);
+  box-shadow:
+    0 0 0 0.5px var(--im-line),
+    0 2px 10px rgba(0, 0, 0, 0.08);
+}
+.head-dot {
+  position: absolute;
+  top: 9px;
+  right: 7px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 2px var(--bg);
+}
+.head-center {
+  justify-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0 6px;
+  border-radius: 14px;
+}
+.head-avatar {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 46px;
+}
+.head-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 1px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.head-name svg {
+  color: var(--text-3);
+}
+.head-status {
+  position: relative;
+  display: grid;
+  height: 15px;
+  font-size: 11px;
+  line-height: 15px;
+  color: var(--im-meta);
+  white-space: nowrap;
+}
+.head-status > span {
+  grid-area: 1 / 1;
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.head-status .busy {
+  color: var(--accent-text);
+  font-weight: 500;
+}
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ok) 22%, transparent);
+}
+
+/* --------------------------------------------------------------- thread */
+
+/* column-reverse puts the scroll origin at the bottom: the browser itself keeps the newest
+   message in view as rows grow, so there is no pinning code to snap. */
+.thread-scroll {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  padding-top: calc(var(--chat-head-h) + 6px);
+  padding-bottom: calc(var(--chat-bottom) + 12px);
+  scroll-padding-bottom: calc(var(--chat-bottom) + 12px);
+}
+.thread {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+}
+.thread-loading {
+  display: grid;
+  place-items: center;
+  height: 52px;
+}
+.thread-start {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 0 8px;
+  text-align: center;
+}
+.thread-start-name {
+  margin-top: 6px;
+  font-family: var(--font-round);
+  font-weight: 800;
+  font-size: 20px;
+}
+.thread-start-sub {
+  font-size: 13px;
+  color: var(--text-3);
+}
+.thread-empty {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 34%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 40px;
+  text-align: center;
+  color: var(--text-2);
+  pointer-events: none;
+}
+.thread-empty p {
+  margin: 14px 0 0;
+  font-size: 15px;
+  line-height: 1.45;
+}
+.thread-empty b {
+  color: var(--text);
+}
+
+.sep {
+  margin: 18px 0 8px;
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--im-meta);
+}
+.sep b {
+  font-weight: 600;
+}
+
+.mrow.g-first {
+  margin-top: 10px;
+}
+.mrow.g-cont {
+  margin-top: 2px;
+}
+.sep + .mrow.g-first {
+  margin-top: 0;
+}
+.source-tag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 20px 5px;
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+
+.brow {
+  position: relative;
+  display: flex;
+  padding: 0 16px;
+}
+.brow.user {
+  justify-content: flex-end;
+}
+.swipe-reply {
+  opacity: 0;
+  position: absolute;
+  left: -28px;
+  top: 50%;
+  margin-top: -15px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--fill);
+  color: var(--text-2);
+}
+
+/* --------------------------------------------------------------- bubble */
+
+.bubble {
+  position: relative;
+  max-width: min(75%, 320px);
+  padding: 7px 12px;
+  border-radius: 18px;
+  font-size: 17px;
+  line-height: 22px;
+  letter-spacing: var(--track-17);
+  overflow-wrap: anywhere;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  /* Vertical pans stay native; horizontal moves reach our swipe-to-reply handler. */
+  touch-action: pan-y;
+  cursor: default;
+  isolation: isolate;
+}
+.bubble.user {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.bubble.agent {
+  background: var(--bubble-agent);
+  color: var(--bubble-agent-text);
+}
+.bubble.has-reaction {
+  margin-top: 18px;
+}
+.bubble.dimmed {
+  visibility: hidden;
+}
+.bubble.big {
+  background: transparent;
+  padding: 0 2px;
+}
+.bubble:has(pre),
+.bubble:has(.md-table) {
+  max-width: min(88%, 360px);
+}
+.plain {
+  white-space: pre-wrap;
+}
+.emoji-big {
+  font-size: 46px;
+  line-height: 1.12;
+  letter-spacing: 2px;
+}
+
+/* The tail takes over this corner (see Tail in Bubble.tsx). */
+.bubble.user.has-tail:not(.big) {
+  border-bottom-right-radius: 0;
+}
+.bubble.agent.has-tail:not(.big) {
+  border-bottom-left-radius: 0;
+}
+.tail {
+  position: absolute;
+  bottom: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.tail-user {
+  right: -6px;
+  color: var(--accent);
+}
+.tail-agent {
+  left: -6px;
+  transform: scaleX(-1);
+  color: var(--bubble-agent);
+}
+
+.quote {
+  display: block;
+  margin: 1px -5px 6px;
+  padding: 6px 10px;
+  border-radius: 13px;
+  background: rgba(0, 0, 0, 0.07);
+  font-size: 14px;
+  line-height: 1.3;
+}
+.bubble.agent .quote {
+  background: var(--fill);
+}
+.quote-who {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.7;
+}
+.quote-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  opacity: 0.85;
+}
+
+.attachments {
+  display: grid;
+  gap: 4px;
+  margin: -3px -9px 4px;
+}
+.attachments:last-child {
+  margin-bottom: -4px;
+}
+.attachments img {
+  width: 100%;
+  max-height: 260px;
+  object-fit: cover;
+  border-radius: 15px;
+}
+.file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.07);
+  color: inherit;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+/* Markdown inside bubbles and cards */
+.md > :first-child {
+  margin-top: 0;
+}
+.md > :last-child {
+  margin-bottom: 0;
+}
+.md p {
+  margin: 0 0 6px;
+}
+.md ul,
+.md ol {
+  margin: 2px 0 6px;
+  padding-left: 20px;
+}
+.md li + li {
+  margin-top: 2px;
+}
+.md li::marker {
+  color: var(--text-3);
+}
+.md h1,
+.md h2,
+.md h3 {
+  margin: 8px 0 4px;
+  font-size: 1.05em;
+  font-weight: 700;
+}
+.md strong {
+  font-weight: 650;
+}
+.md a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+.bubble.agent .md a {
+  color: var(--accent-text);
+}
+.md code {
+  font-family: var(--font-mono);
+  font-size: 0.84em;
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: var(--fill);
+}
+.md pre {
+  margin: 4px -5px 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--bg-sunk);
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.md pre code {
+  padding: 0;
+  background: none;
+  font-size: inherit;
+}
+.md blockquote {
+  margin: 4px 0;
+  padding-left: 10px;
+  border-left: 3px solid var(--hairline-strong);
+  color: var(--text-2);
+}
+.md-table {
+  margin: 4px -5px 6px;
+  overflow-x: auto;
+}
+.md table {
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 100%;
+}
+.md th,
+.md td {
+  padding: 5px 8px;
+  text-align: left;
+  border-bottom: 0.5px solid var(--hairline-strong);
+  white-space: nowrap;
+}
+.md th {
+  font-weight: 600;
+  color: var(--text-2);
+  font-size: 12px;
+}
+.md hr {
+  border: 0;
+  border-top: 0.5px solid var(--hairline-strong);
+  margin: 10px 0;
+}
+
+/* ------------------------------------------------------------ reactions */
+
+.reactions {
+  position: absolute;
+  top: -19px;
+  display: flex;
+  z-index: 2;
+  pointer-events: none;
+}
+.reactions.on-agent {
+  right: -16px;
+}
+.reactions.on-user {
+  left: -16px;
+  flex-direction: row-reverse;
+}
+.reaction {
+  position: relative;
+  width: 31px;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 16px;
+  line-height: 1;
+  box-shadow: 0 0 0 2.5px var(--bg);
+}
+.reaction.by-user {
+  background: var(--accent);
+}
+.reaction.by-agent {
+  background: var(--bubble-agent);
+}
+.on-user .reaction.by-agent {
+  background: var(--bg-elev);
+  box-shadow:
+    0 0 0 2.5px var(--bg),
+    inset 0 0 0 0.5px var(--hairline-strong);
+}
+.reactions .reaction + .reaction {
+  margin-left: -9px;
+}
+.reactions.on-user .reaction + .reaction {
+  margin-left: 0;
+  margin-right: -9px;
+}
+
+/* ------------------------------------------------------------- receipts */
+
+.receipt-row {
+  display: flex;
+  justify-content: flex-end;
+  min-height: 17px;
+  padding: 3px 18px 0;
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 600;
+  color: var(--im-meta);
+}
+.receipt.failed {
+  color: var(--danger);
+}
+/* Old and new receipt text share one grid cell while they crossfade: no layout measuring. */
+.receipt-stack {
+  display: grid;
+}
+.receipt-stack > * {
+  grid-area: 1 / 1;
+  justify-self: end;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- typing */
+
+.typing-row {
+  display: flex;
+  /* Same footprint as a one-line reply, so the dots turn into the message without a jump. */
+  margin-top: 10px;
+  padding: 0 16px;
+  transform-origin: 16px 100%;
+}
+.typing-bubble {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 13px;
+  border-radius: 18px;
+  background: var(--bubble-agent);
+}
+/* The two little trailing circles. */
+.typing-bubble::before,
+.typing-bubble::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: var(--bubble-agent);
+}
+.typing-bubble::before {
+  left: -2px;
+  bottom: -2px;
+  width: 13px;
+  height: 13px;
+}
+.typing-bubble::after {
+  left: -7px;
+  bottom: -7px;
+  width: 6px;
+  height: 6px;
+}
+.dots {
+  display: flex;
+  gap: 4px;
+}
+.dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--im-meta);
+  animation: dot-wave 1.4s ease-in-out infinite;
+}
+.dots i:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.dots i:nth-child(3) {
+  animation-delay: 0.4s;
+}
+.typing-row.thinking .dots i {
+  animation-duration: 2s;
+}
+@keyframes dot-wave {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: none;
+  }
+  30% {
+    opacity: 0.9;
+    transform: scale(1.12);
+  }
+}
+
+/* --------------------------------------------------------- new msgs pill */
+
+.new-pill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--chat-bottom) + 12px);
+  z-index: 9;
+  width: fit-content;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--bg-elev);
+  color: var(--accent-text);
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: var(--shadow-2);
+}
+
+/* ------------------------------------------------------- approval banner */
+
+.ap-banner {
+  position: absolute;
+  top: calc(var(--chat-head-h) + 8px);
+  left: 10px;
+  right: 10px;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px 9px 10px;
+  border-radius: 16px;
+  background: var(--guard-bg);
+  color: var(--guard-text);
+  text-align: left;
+  box-shadow:
+    0 0 0 1px var(--guard-line),
+    var(--shadow-2);
+}
+.ap-banner-icon {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--guard-amber);
+  color: #1e1a10;
+}
+.ap-banner-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--guard-2);
+}
+.ap-banner-text b {
+  color: var(--guard-text);
+  font-size: 14px;
+}
+.ap-banner-count {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--guard-amber);
+  color: #1e1a10;
+  font-size: 12px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+/* ---------------------------------------------------------------- cards */
+
+.crow {
+  display: flex;
+  padding: 0 16px;
+}
+.card {
+  position: relative;
+  width: min(86%, 340px);
+  border-radius: 20px;
+  text-align: left;
+  font-size: 15px;
+}
+
+.task-card {
+  display: block;
+  padding: 13px 14px 14px;
+  background: var(--bg-elev);
+  box-shadow:
+    inset 0 0 0 0.5px var(--hairline-strong),
+    var(--shadow-1);
+}
+.task-card:active {
+  transform: scale(0.985);
+}
+.task-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.task-status {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+}
+.task-spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2.5px solid var(--accent-soft);
+  border-top-color: var(--accent);
+  animation: spin 0.9s linear infinite;
+}
+.task-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--ok);
+  color: #fff;
+}
+.task-check.bad {
+  background: var(--danger);
+}
+.task-titles {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.task-kicker {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.task-title {
+  font-size: 15.5px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.task-chev {
+  color: var(--text-3);
+  flex: none;
+}
+.task-bar {
+  height: 4px;
+  margin: 12px 0 10px;
+  border-radius: 2px;
+  background: var(--fill);
+  overflow: hidden;
+}
+.task-bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transform-origin: 0 50%;
+}
+.task-card.is-done .task-bar span {
+  background: var(--ok);
+}
+.task-card.is-failed .task-bar span {
+  background: var(--danger);
+}
+.task-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.task-steps li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 3px 0;
+  font-size: 14px;
+  color: var(--text-2);
+}
+.task-steps li.active {
+  color: var(--text);
+  font-weight: 500;
+}
+.step-dot {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.step-dot .pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: dot-pulse 1.2s ease-in-out infinite;
+}
+.task-result {
+  font-size: 15px;
+  line-height: 1.4;
+}
+.task-result .md p {
+  margin-bottom: 4px;
+}
+
+/* The approval card is a different material on purpose: it's the one place the agent asks for trust. */
+.approval-card {
+  padding: 14px;
+  background: var(--guard-bg);
+  color: var(--guard-text);
+  box-shadow:
+    0 0 0 1px var(--guard-line),
+    inset 0 1px 0 rgba(242, 180, 65, 0.35),
+    var(--shadow-2);
+  width: min(90%, 350px);
+}
+.approval-card.resolved {
+  opacity: 0.92;
+}
+.ap-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ap-shield {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--guard-amber);
+  color: #1e1a10;
+}
+.ap-titles {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.ap-kicker {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--guard-amber);
+}
+.ap-title {
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.25;
+}
+.ap-tool {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 12px 0 6px;
+  font-size: 12px;
+  color: var(--guard-2);
+}
+.ap-tool-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--guard-text);
+}
+.ap-detail {
+  margin: 0;
+  max-height: 220px;
+  overflow: auto;
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: var(--guard-code);
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.08);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.ap-raw-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  margin-top: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--guard-2);
+}
+.ap-raw {
+  margin: 0;
+  overflow: auto;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--guard-code);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--guard-2);
+  white-space: pre-wrap;
+}
+.ap-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.3fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+.ap-btn {
+  height: 44px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--guard-text);
+  transition: transform 0.12s, background-color 0.15s;
+}
+.ap-btn:active {
+  transform: scale(0.96);
+}
+.ap-btn.deny {
+  color: #ff8d84;
+}
+.ap-btn.once {
+  background: var(--guard-amber);
+  color: #1e1a10;
+}
+.ap-outcome {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--guard-2);
+}
+.ap-outcome.ok {
+  color: #6fdca6;
+}
+.ap-outcome.err {
+  color: #ff8d84;
+}
+
+.reminder-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: auto;
+  max-width: 86%;
+  padding: 12px 18px 12px 12px;
+  background: var(--bg-elev);
+  box-shadow:
+    inset 0 0 0 0.5px var(--hairline-strong),
+    var(--shadow-1);
+}
+.reminder-card.has-reaction {
+  margin-top: 18px;
+}
+.rem-bell {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.rem-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.rem-kicker {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.rem-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+.rem-when {
+  font-size: 14px;
+  color: var(--accent-text);
+  font-weight: 500;
+}
+.notice {
+  margin: 4px auto;
+  max-width: 80%;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+/* ------------------------------------------------------------- composer */
+
+/* Floats just above the tab bar; slides down into the bar's place while you type. */
+.composer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--dock);
+  z-index: 8;
+  padding: 6px calc(12px + var(--safe-r)) 8px calc(12px + var(--safe-l));
+  transition: transform var(--spring-soft-ms) var(--spring-soft) 0.04s;
+}
+.chat.composing .composer {
+  transform: translateY(calc(var(--dock) - max(var(--safe-b), 6px)));
+  transition: transform var(--spring-glide-ms) var(--spring-glide);
+}
+/* The keyboard slide (viewport.ts): the chat keeps its full height, painted with its own
+   background, until the slide lands. The composer is held at its final spot in layout (iOS
+   pans the whole page if the focused field's box sits under the keyboard) and only its
+   transform travels. The bottom fade sits it out. */
+:root.kb-anim.kb-open .composer,
+:root.kb-anim.kb-open .chat.composing .composer {
+  bottom: var(--kb-ext, 0px);
+}
+:root.kb-anim .app,
+:root.kb-anim .app-content {
+  overflow: visible;
+}
+:root.kb-anim .chat {
+  bottom: calc(-1 * var(--kb-ext, 0px));
+}
+.chat::after {
+  transition: opacity 0.2s ease;
+}
+:root.kb-anim .chat::after {
+  opacity: 0;
+}
+.kb-open .composer,
+.kb-open .chat.composing .composer {
+  bottom: 0;
+  transform: none;
+  transition: none;
+}
+.composer-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.composer-plus {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--im-gray);
+  color: var(--im-meta);
+  transition: transform 0.15s;
+}
+.composer-plus:active {
+  transform: scale(0.9);
+}
+.composer-field {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 3px 0 14px;
+  border-radius: 18px;
+  background: var(--im-field);
+  box-shadow: inset 0 0 0 1px var(--im-line);
+}
+/* 22px lines + 7px above and below = a 36px pill. Composer.tsx sizes in the same units. */
+.composer-field textarea {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  margin: 0;
+  padding: 7px 0;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  resize: none;
+  overflow: hidden;
+  font-size: 17px;
+  line-height: 22px;
+  letter-spacing: var(--track-17);
+  caret-color: var(--accent);
+}
+.composer-field textarea::placeholder {
+  color: var(--im-meta);
+  line-height: 22px;
+  opacity: 1;
+}
+.send-btn {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  margin: 3px 0 3px 4px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.send-btn.stop {
+  background: var(--text);
+  color: var(--bg);
+}
+.reply-chip {
+  overflow: hidden;
+}
+.reply-inner {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 2px 4px 8px 12px;
+  color: var(--text-2);
+}
+.reply-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: 13.5px;
+  line-height: 1.3;
+  padding-left: 9px;
+  border-left: 2.5px solid var(--accent);
+}
+.reply-who {
+  font-weight: 600;
+  color: var(--accent-text);
+  font-size: 12.5px;
+}
+.reply-x {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--fill);
+}
+.thumbs {
+  overflow: hidden;
+}
+.thumbs-inner {
+  display: flex;
+  gap: 10px;
+  padding: 6px 4px 10px 48px;
+  overflow-x: auto;
+}
+.thumb {
+  position: relative;
+  flex: none;
+  width: 64px;
+  height: 64px;
+}
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 13px;
+}
+.thumb-busy {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: rgba(0, 0, 0, 0.35);
+}
+.thumb-x {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--text);
+  color: var(--bg);
+  box-shadow: 0 0 0 2px var(--bg);
+}
+
+/* ------------------------------------------------------- reaction menu */
+
+.rmenu {
+  position: absolute;
+  inset: 0;
+  z-index: 120;
+  isolation: isolate;
+}
+.rmenu-backdrop {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--bg) 52%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  backdrop-filter: blur(18px) saturate(1.3);
+}
+.rmenu-bubble {
+  position: absolute;
+  display: flex;
+}
+.rmenu-bubble.brow {
+  padding: 0;
+}
+.bubble.lifted {
+  max-width: none;
+  box-shadow: 0 10px 30px rgba(20, 16, 8, 0.18);
+}
+.tapback-bar {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  height: 52px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--bg-elev);
+  box-shadow: var(--shadow-3);
+}
+.tapback {
+  width: 41px;
+  height: 41px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 24px;
+  line-height: 1;
+}
+.tapback.on {
+  background: var(--accent);
+}
+.tapback.more {
+  color: var(--text-2);
+  background: var(--fill);
+  width: 36px;
+  height: 36px;
+  margin-left: 3px;
+  font-size: 20px;
+}
+.tapback.more.on {
+  background: var(--accent);
+}
+.rmenu-actions {
+  position: absolute;
+  width: 230px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(30px) saturate(1.6);
+  backdrop-filter: blur(30px) saturate(1.6);
+  box-shadow: var(--shadow-3);
+}
+.rmenu-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 46px;
+  padding: 0 16px;
+  font-size: 16.5px;
+  text-align: left;
+}
+.rmenu-actions button + button {
+  border-top: 0.5px solid var(--hairline-strong);
+}
+.rmenu-actions button:active {
+  background: var(--fill);
+}
+.emoji-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(330px + var(--safe-b));
+  display: flex;
+  flex-direction: column;
+  padding: 12px 10px var(--safe-b);
+  border-radius: 22px 22px 0 0;
+  background: var(--bg-elev);
+  box-shadow: var(--shadow-3);
+}
+.emoji-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  margin: 0 4px 8px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: var(--fill);
+  color: var(--text-3);
+}
+.emoji-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: 16px;
+  color: var(--text);
+}
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  align-content: start;
+}
+.emoji-grid button {
+  height: 44px;
+  font-size: 28px;
+  border-radius: 10px;
+}
+.emoji-grid button.on,
+.emoji-grid button:active {
+  background: var(--accent-soft);
+}
+.emoji-none {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-2);
+  font-size: 14px;
+}
+
+/* --------------------------------------------------------------- drawer */
+
+.drawer-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  isolation: isolate;
+}
+.drawer-scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--scrim);
+}
+.drawer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(86%, 350px);
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--safe-t);
+  background: var(--bg);
+  border-radius: 0 24px 24px 0;
+  box-shadow: var(--shadow-3);
+}
+.drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 14px 10px 20px;
+}
+.drawer-head h2 {
+  margin: 0;
+  font-family: var(--font-round);
+  font-weight: 800;
+  font-size: 30px;
+}
+.drawer-list {
+  padding: 4px 8px calc(var(--safe-b) + 16px);
+}
+.thread-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 10px;
+  border-radius: 16px;
+  text-align: left;
+}
+.thread-item.active {
+  background: var(--fill);
+}
+.thread-item:active {
+  background: var(--fill-2);
+}
+.thread-icon {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--fill);
+  color: var(--text-2);
+}
+.thread-item:first-child .thread-icon {
+  background: var(--accent-soft);
+}
+.thread-text {
+  flex: 1;
+  min-width: 0;
+}
+.thread-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.thread-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+.thread-time {
+  flex: none;
+  font-size: 13px;
+  color: var(--text-3);
+}
+.thread-preview {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--text-2);
+}
+.thread-preview em {
+  color: var(--accent-text);
+  font-style: normal;
+}
+.unread-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* ------------------------------------------------- one-shot entrances */
+/* Transform + opacity only; `both` holds the start frame through any stagger delay. */
+
+/* A new row grows from zero height to its own (grid 0fr -> 1fr), so the rows above glide up
+   as it makes room: a sent bubble rises out from behind the composer, a reply rises from
+   where the typing dots were. Its bubble blooms from its tail corner at the same time. */
+.mrow.enter {
+  display: grid;
+  grid-template-rows: 1fr;
+  animation: row-grow var(--spring-glide-ms) var(--spring-glide) both;
+  animation-delay: var(--d, 0s);
+}
+.mrow-in {
+  min-height: 0;
+}
+/* While the row is still short, its bubble hangs from the row's bottom edge (overflowing
+   upward, under the rows that are moving away), so it is whole from the first frame instead of
+   being uncovered from behind the composer fade like a wipe. */
+.mrow.enter > .mrow-in,
+.typing-fold > .fold-in {
+  align-self: end;
+}
+@keyframes row-grow {
+  from {
+    grid-template-rows: 0fr;
+    margin-top: 0;
+  }
+}
+.mrow.enter .bubble,
+.mrow.enter .crow > * {
+  animation:
+    bloom var(--spring-bubble-ms) var(--spring-bubble) both,
+    bubble-fade 0.28s ease-out both;
+  animation-delay: var(--d, 0s);
+}
+.mrow.from-user .bubble {
+  transform-origin: 100% 100%;
+}
+.mrow.from-agent .bubble,
+.mrow.from-agent .crow > * {
+  transform-origin: 0% 100%;
+}
+@keyframes bloom {
+  from {
+    transform: scale(0.82);
+  }
+}
+.mrow.enter.from-agent {
+  animation: row-grow var(--calm-ms) var(--ease-calm) both;
+  animation-delay: var(--d, 0s);
+}
+.mrow.enter.from-agent .bubble,
+.mrow.enter.from-agent .crow > * {
+  animation:
+    settle var(--calm-ms) var(--ease-calm) both,
+    bubble-fade 0.45s ease-out both;
+  animation-delay: var(--d, 0s);
+}
+@keyframes settle {
+  from {
+    transform: translateY(6px) scale(0.95);
+  }
+}
+@keyframes bubble-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Receipts and the typing dots fold open and shut by height instead of popping. */
+.fold {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--spring-glide-ms) var(--spring-glide),
+    opacity 0.2s ease;
+}
+.fold.open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition:
+    grid-template-rows var(--spring-glide-ms) var(--spring-glide),
+    opacity 0.3s ease 0.06s;
+}
+.fold-in {
+  min-height: 0;
+  overflow: hidden;
+}
+.receipt-fold.open {
+  transition:
+    grid-template-rows var(--spring-glide-ms) var(--spring-glide) 1.34s,
+    opacity 0.4s ease 1.44s;
+}
+.typing-fold .fold-in {
+  overflow: visible;
+}
+.typing-fold .typing-row {
+  transform: scale(0.8);
+  opacity: 0;
+  transition:
+    transform var(--calm-ms) var(--ease-calm),
+    opacity 0.3s ease;
+}
+.typing-fold {
+  transition:
+    grid-template-rows var(--calm-ms) var(--ease-calm),
+    opacity 0.3s ease;
+}
+.typing-fold.open .typing-row {
+  transform: none;
+  opacity: 1;
+}
+.fold:not(.open) .dots i {
+  animation-play-state: paused;
+}
+.fade-in {
+  animation: fade-in 0.28s ease-out both;
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.pop-in {
+  animation: pop-in 0.4s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.2) rotate(-40deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.task-bar span {
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}

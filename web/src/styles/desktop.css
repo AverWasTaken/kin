@@ -1,0 +1,321 @@
+/* ============================================================== Desktop
+   A wide window lays out like Messages on a Mac: a sidebar of conversations on the left,
+   the open conversation (or section) on the right. Only applies once signed in. */
+
+.app.desktop {
+  --safe-t: 0px;
+  --safe-b: 0px;
+  --safe-l: 0px;
+  --safe-r: 0px;
+  --dock: 0px;
+  --sidebar-w: 300px;
+  --sb-bg: #f0f0f2;
+  --sb-sel: var(--accent);
+  inset: 0;
+  top: 0;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+@media (prefers-color-scheme: dark) {
+  .app.desktop {
+    --sb-bg: #1c1c1e;
+  }
+}
+
+.app.desktop .tab-panel {
+  left: var(--sidebar-w);
+}
+/* Phone-width sections read better as a centred column than stretched across a monitor. */
+.app.desktop .tab-pad {
+  padding-inline: max(0px, calc((100% - 720px) / 2));
+}
+.app.desktop .sheet {
+  margin: 0 auto;
+  max-width: 640px;
+}
+
+/* --------------------------------------------------------------- sidebar */
+
+.sidebar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 30;
+  width: var(--sidebar-w);
+  display: flex;
+  flex-direction: column;
+  background: var(--sb-bg);
+  box-shadow: inset -0.5px 0 0 var(--im-line);
+}
+.sb-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 10px 0 18px;
+}
+.sb-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+.sb-icon {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--text-2);
+}
+.sb-icon:hover {
+  background: var(--fill);
+}
+.sb-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  margin: 0 12px 8px;
+  padding: 0 9px;
+  border-radius: 8px;
+  background: var(--fill-2);
+  color: var(--im-meta);
+}
+.sb-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--text);
+}
+.sb-search input::placeholder {
+  color: var(--im-meta);
+}
+.sb-search:focus-within {
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.35);
+}
+.sb-list {
+  padding: 0 8px 8px;
+}
+.sb-thread {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px 9px 16px;
+  border-radius: 10px;
+  text-align: left;
+  color: var(--text);
+}
+.sb-thread:hover {
+  background: var(--fill);
+}
+.sb-thread.on {
+  background: var(--sb-sel);
+  color: var(--accent-ink);
+}
+.sb-unread {
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+}
+.sb-unread.show {
+  opacity: 1;
+}
+.sb-avatar {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--fill-2);
+  color: var(--text-2);
+}
+.sb-thread.on .sb-avatar {
+  color: inherit;
+}
+.sb-text {
+  flex: 1;
+  min-width: 0;
+}
+.sb-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.sb-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+.sb-time {
+  flex: none;
+  font-size: 12px;
+  color: var(--im-meta);
+}
+.sb-preview {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 1px;
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--im-meta);
+}
+.sb-preview em {
+  font-style: normal;
+  color: var(--accent-text);
+}
+.sb-thread.on .sb-time,
+.sb-thread.on .sb-preview,
+.sb-thread.on .sb-preview em {
+  color: inherit;
+  opacity: 0.8;
+}
+.sb-empty {
+  padding: 24px 12px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--im-meta);
+}
+.sb-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 8px;
+  box-shadow: inset 0 0.5px 0 var(--im-line);
+}
+.sb-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  text-align: left;
+}
+.sb-section svg {
+  color: var(--accent-text);
+}
+.sb-section:hover {
+  background: var(--fill);
+}
+.sb-section.on {
+  background: var(--fill-2);
+}
+
+/* -------------------------------------------------------------- chat pane */
+
+.app.desktop .chat {
+  --chat-head-h: 56px;
+  --chat-bottom: var(--composer-h, 52px);
+}
+/* Compact title bar: avatar, then name over status, left-aligned like "To: …" on the Mac. */
+.app.desktop .chat-head {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  padding: 0 16px;
+  background: var(--bg);
+  box-shadow: inset 0 -0.5px 0 var(--im-line);
+}
+.app.desktop .head-left,
+.app.desktop .head-right {
+  display: none;
+}
+.app.desktop .head-center {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-areas: "av name" "av status";
+  justify-content: start;
+  align-items: center;
+  column-gap: 10px;
+  justify-self: start;
+  padding: 4px 8px 4px 4px;
+  border-radius: 10px;
+}
+.app.desktop .head-center:hover {
+  background: var(--fill);
+}
+.app.desktop .head-avatar {
+  grid-area: av;
+  width: 36px;
+  height: 36px;
+}
+.app.desktop .head-name {
+  grid-area: name;
+  margin: 0;
+  font-size: 14px;
+}
+.app.desktop .head-status {
+  grid-area: status;
+}
+.app.desktop .head-status > span {
+  justify-self: start;
+}
+
+.app.desktop .brow {
+  padding: 0 20px;
+}
+.app.desktop .bubble {
+  max-width: min(62%, 540px);
+  padding: 6px 12px;
+  border-radius: 17px;
+  font-size: 15px;
+  line-height: 20px;
+  letter-spacing: var(--track-15);
+}
+.app.desktop .bubble:has(pre),
+.app.desktop .bubble:has(.md-table) {
+  max-width: min(75%, 640px);
+}
+.app.desktop .receipt-row {
+  padding-right: 22px;
+}
+.app.desktop .typing-row {
+  padding-left: 20px;
+}
+.app.desktop .typing-bubble {
+  height: 32px;
+  border-radius: 16px;
+}
+.app.desktop .composer {
+  bottom: 0;
+  padding: 8px 20px 14px;
+}
+.app.desktop .chat.composing .composer {
+  transform: none;
+}
+.app.desktop .composer-plus {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 2px;
+}
+.app.desktop .composer-field textarea {
+  font-size: 15px;
+  letter-spacing: var(--track-15);
+}
+.app.desktop .crow {
+  padding: 0 20px;
+}
+.app.desktop .thread-empty {
+  top: 30%;
+}

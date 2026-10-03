@@ -1,0 +1,158 @@
+.av {
+  display: block;
+  flex: none;
+  color: var(--text-2);
+}
+
+/* Breathing scales the whole <svg> box, which the compositor can do on its own layer.
+   Animating a <g> inside it would repaint the drawing every frame. */
+.av.av-breathe {
+  transform-origin: 50% 86%;
+  will-change: transform;
+  animation: av-breathe 3.8s ease-in-out infinite;
+}
+.av.av-breathe[data-state="asleep"] {
+  animation-duration: 5.5s;
+}
+.av.av-breathe[data-state="listening"] {
+  animation-duration: 2.6s;
+}
+@keyframes av-breathe {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1.015, 1.035);
+  }
+}
+
+.av-scan {
+  animation: av-scan 1.5s ease-in-out infinite;
+}
+@keyframes av-scan {
+  0%,
+  100% {
+    transform: translateX(-2.6px) translateY(1px);
+  }
+  50% {
+    transform: translateX(2.6px) translateY(1px);
+  }
+}
+
+.av-orbit {
+  animation: av-orbit 2.4s linear infinite;
+}
+@keyframes av-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.av-tap .av-hand-l,
+.av-tap .av-hand-r {
+  animation: av-tap 0.36s ease-in-out infinite alternate;
+}
+.av-tap .av-hand-r {
+  animation-delay: 0.18s;
+}
+.av-tap-fast .av-hand-l,
+.av-tap-fast .av-hand-r {
+  animation-duration: 0.22s;
+}
+.av-tap-fast .av-hand-r {
+  animation-delay: 0.11s;
+}
+@keyframes av-tap {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(2.6px);
+  }
+}
+
+.av-spark {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: av-spark 1.1s ease-in-out infinite;
+  opacity: 0;
+}
+.av-spark-2 {
+  animation-delay: 0.35s;
+}
+.av-spark-3 {
+  animation-delay: 0.7s;
+}
+@keyframes av-spark {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotate(0deg);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1) rotate(30deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.4) rotate(70deg) translateY(-4px);
+  }
+}
+
+.av-z {
+  animation: av-z 3s ease-in-out infinite;
+  opacity: 0;
+}
+.av-z-2 {
+  animation-delay: 1s;
+}
+.av-z-3 {
+  animation-delay: 2s;
+}
+@keyframes av-z {
+  0% {
+    opacity: 0;
+    transform: translate(0, 4px);
+  }
+  30% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(6px, -10px);
+  }
+}
+
+.av-pop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: av-pop 0.9s var(--ease-out) both;
+}
+.av-pop-2 {
+  animation-delay: 0.12s;
+}
+@keyframes av-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.2) rotate(20deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.6) rotate(60deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .av,
+  .av * {
+    animation: none !important;
+  }
+  .av-spark,
+  .av-z {
+    opacity: 0.8;
+  }
+}

@@ -1,0 +1,133 @@
+.onboarding {
+  background: var(--bg);
+}
+.ob-top {
+  flex: none;
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  padding: calc(var(--safe-t) + 6px) 8px 0;
+}
+.ob-top .hidden {
+  visibility: hidden;
+}
+.ob-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+.ob-dots span {
+  height: 7px;
+  border-radius: 4px;
+  background: var(--hairline-strong);
+  transition: background-color 0.3s;
+}
+.ob-dots span.on {
+  background: var(--text);
+}
+.ob-scroll {
+  padding: 8px 24px 24px;
+}
+.ob-avatar-wrap {
+  position: sticky;
+  top: -8px;
+  z-index: 2;
+  margin: 0 -24px 6px;
+  padding: 10px 0 10px;
+  background:
+    radial-gradient(46% 60% at 50% 46%, rgba(var(--accent-rgb), 0.2), transparent 72%),
+    linear-gradient(to bottom, var(--bg) 82%, transparent);
+}
+.ob-avatar {
+  display: flex;
+  justify-content: center;
+  transform-origin: 50% 0%;
+}
+.ob-step {
+  text-align: center;
+}
+.ob-title {
+  margin: 4px 0 8px;
+  font-family: var(--font-round);
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+.ob-sub {
+  margin: 0 auto 22px;
+  max-width: 320px;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+.ob-body {
+  text-align: left;
+}
+.ob-name {
+  height: 58px;
+  text-align: center;
+  font-family: var(--font-round);
+  font-size: 24px;
+  font-weight: 800;
+}
+.ob-suggest {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.ob-form .field-label {
+  margin-bottom: 12px;
+}
+.ob-note {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--fill);
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.ob-note svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--text);
+}
+.ob-note p {
+  margin: 0;
+}
+.ob-note b {
+  color: var(--text);
+}
+.ob-push-on {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--ok) 12%, transparent);
+  color: var(--ok);
+  font-weight: 600;
+}
+.ob-push-check {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ok);
+  color: #fff;
+}
+.ob-foot {
+  flex: none;
+  padding: 10px 24px calc(var(--safe-b) + 14px);
+  background: linear-gradient(to bottom, transparent, var(--bg) 30%);
+}
+.kb-open .ob-foot {
+  padding-bottom: 10px;
+}
