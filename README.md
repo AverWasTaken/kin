@@ -4,6 +4,16 @@ Kin is a personal agent you host yourself. It runs on a machine you own, sends e
 
 Every turn runs through your local `claude` login, so usage comes out of your Claude plan. There's no API key to manage.
 
+<p align="center">
+  <img src="docs/screenshots/chat.png" width="19%" alt="Chat with read receipts and tapback reactions">
+  <img src="docs/screenshots/approval.png" width="19%" alt="An approval card for sending an email">
+  <img src="docs/screenshots/today.png" width="19%" alt="The morning brief on the Today tab">
+  <img src="docs/screenshots/goals.png" width="19%" alt="Goals with progress rings">
+  <img src="docs/screenshots/profile.png" width="19%" alt="The agent's profile with upcoming schedules">
+</p>
+
+<p align="center"><sub>Screenshots from the built-in demo mode. Every person and message in them is made up.</sub></p>
+
 ## What it does
 
 - Holds one long conversation that spans days. You can text it mid-task and it picks up the new message at its next tool call.

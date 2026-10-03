@@ -120,14 +120,12 @@ export function mainThreadMessages(): Message[] {
     }),
     msg(MAIN, { role: "user", text: "nah that's fine", at: ago(12 * MIN) }),
     msg(MAIN, { role: "user", text: "what's the weather looking like for saturday's hike?", at: ago(11 * MIN + 30_000) }),
-    msg(MAIN, { role: "agent", text: "Saturday looks **great** for it:", at: ago(11 * MIN) }),
     msg(MAIN, {
       role: "agent",
-      text: "- 🌤 High 19°, low 9°\n- Light wind from the west\n- 10% chance of rain after 4pm",
-      at: ago(11 * MIN - 1000),
+      text: "Saturday looks **great** for it:\n\n- 🌤 High 19°, low 9°\n- Light wind from the west\n- 10% chance of rain after 4pm\n\nParking at the Mt. Tam trailhead fills up by 9, so I'd leave by 8.",
+      at: ago(11 * MIN),
       reactions: [{ emoji: "❤️", by: "user" }],
     }),
-    msg(MAIN, { role: "agent", text: "Parking at the Mt. Tam trailhead fills up by 9, so I'd leave by 8.", at: ago(11 * MIN - 2000) }),
     msg(MAIN, { role: "user", text: "perfect, thanks!", at: ago(2 * MIN), readAt: ago(2 * MIN - 3000), reactions: [{ emoji: "👍", by: "agent" }] }),
   ];
   return list;
